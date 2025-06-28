@@ -1,7 +1,7 @@
 import argparse
 import torch
 import torch.nn as nn
-import Modelconfig
+import Config.Modelconfig as Modelconfig
 
 class RMSNorm(nn.Module):
     def __init__(self,dim:int,eps:float):

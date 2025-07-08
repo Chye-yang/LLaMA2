@@ -1,4 +1,9 @@
 # 注意：此处的dim应为 dim//n_head，因为我们是对每个head进行旋转嵌入
+
+from typing import Tuple
+import torch
+
+
 def precompute_freqs_cis(dim: int, end: int, theta: float = 10000.0):
     # torch.arange(0, dim, 2)[: (dim // 2)].float()生成了一个从0开始，步长为2的序列，长度为dim的一半
     # 然后每个元素除以dim，再取theta的倒数，得到频率
@@ -13,21 +18,23 @@ def precompute_freqs_cis(dim: int, end: int, theta: float = 10000.0):
     freqs_sin = torch.sin(freqs)
     return freqs_cos, freqs_sin
 
+
 def reshape_for_broadcast(freqs_cis: torch.Tensor, x: torch.Tensor):
     # 获取x的维度数
     ndim = x.ndim
-    
+
     # 断言，确保1在x的维度范围内
     assert 0 <= 1 < ndim
-    
+
     # 断言，确保freqs_cis的形状与x的第二维和最后一维相同
     assert freqs_cis.shape == (x.shape[1], x.shape[-1])
-    
+
     # 构造一个新的形状，除了第二维和最后一维，其他维度都为1，这样做是为了能够将freqs_cis与x进行广播操作
     shape = [d if i == 1 or i == ndim - 1 else 1 for i, d in enumerate(x.shape)]
-    
+
     # 将freqs_cis调整为新的形状，并返回
     return freqs_cis.view(shape)
+
 
 def apply_rotary_emb(
     xq: torch.Tensor,
@@ -35,7 +42,6 @@ def apply_rotary_emb(
     freqs_cos: torch.Tensor,
     freqs_sin: torch.Tensor
 ) -> Tuple[torch.Tensor, torch.Tensor]:
-
     # 将查询和键张量转换为浮点数，并重塑形状以分离实部和虚部
     xq_r, xq_i = xq.float().reshape(xq.shape[:-1] + (-1, 2)).unbind(-1)
     xk_r, xk_i = xk.float().reshape(xk.shape[:-1] + (-1, 2)).unbind(-1)
@@ -56,13 +62,3 @@ def apply_rotary_emb(
 
     return xq_out.type_as(xq), xk_out.type_as(xk)
 
-
-xq = torch.randn(1, 50, 6, 48) # bs, seq_len, dim//n_head, n_head_dim
-xk = torch.randn(1, 50, 6, 48) # bs, seq_len, dim//n_head, n_head_dim
-
-# 使用 precompute_freqs_cis 函数获取 sin和cos
-cos, sin = precompute_freqs_cis(288//6, 50)
-print(cos.shape, sin.shape)
-xq_out, xk_out = apply_rotary_emb(xq, xk, cos, sin)
-
-xq_out.shape, xk_out.shape

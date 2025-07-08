@@ -4,7 +4,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import math
 from Config.Modelconfig import ModelConfig
-
+from Attention.Rope import apply_rotary_emb
+from Attention.repeat_kv import repeat_kv
 
 class Attention(nn.Module):
     def __init__(self, args: ModelConfig):
@@ -92,3 +93,4 @@ class Attention(nn.Module):
         output = self.wo(output)
         output = self.resid_dropout(output)
         return output
+

@@ -1,3 +1,5 @@
+import torch
+
 def repeat_kv(x: torch.Tensor, n_rep: int) -> torch.Tensor:
     # 获取输入张量的形状：批量大小、序列长度、键/值对头的数量、每个头的维度大小
     bs, slen, n_kv_heads, head_dim = x.shape

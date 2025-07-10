@@ -1,1 +1,4 @@
 download/*
+download/pre_data/mobvoi_seq_monkey_general_open_corpus.jsonl
+download/pre_data/mobvoi_seq_monkey_general_open_corpus.jsonl.tar.bz2
+download/sft_data/train_3.5M_CN.json
